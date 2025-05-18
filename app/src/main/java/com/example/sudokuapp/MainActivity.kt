@@ -1,5 +1,12 @@
 package com.example.sudokuapp
-
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -82,16 +89,19 @@ fun SudokuBoard(viewModel: GameViewModel) {
             Row {
                 row.forEachIndexed { colIndex, value ->
                     val isSelected = viewModel.selectedRow == rowIndex && viewModel.selectedCol == colIndex
-                    Button(
-                        onClick = { viewModel.selectCell(rowIndex, colIndex) },
+                    Box(
                         modifier = Modifier
                             .size(40.dp)
-                            .padding(1.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSelected) Color.Gray else Color.LightGray
-                        )
+                            .padding(1.dp)
+                            .border(
+                                width = if (isSelected) 3.dp else 1.dp,
+                                color = if (isSelected) Color.Blue else Color.Black
+                            )
+                            .background(Color.White)
+                            .clickable { viewModel.selectCell(rowIndex, colIndex) },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(if (value == 0) "" else value.toString())
+                        Text(text = if (value == 0) "" else value.toString())
                     }
                 }
             }
@@ -115,7 +125,13 @@ fun GameScreen(viewModel: GameViewModel) {
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
-        NumberPad(onNumberClick = { viewModel.inputNumber() }, selectedNumber = viewModel.selectedNumber)
+        NumberPad(
+            onNumberClick = { number ->
+                viewModel.selectNumber(number)  // 숫자 선택 먼저
+                viewModel.inputNumber()         // 선택된 셀에 입력
+            },
+            selectedNumber = viewModel.selectedNumber
+        )
     }
 }
 
@@ -123,18 +139,25 @@ fun GameScreen(viewModel: GameViewModel) {
 fun NumberPad(onNumberClick: (Int) -> Unit, selectedNumber: Int) {
     Column {
         (1..9).chunked(3).forEach { row ->
-            Row {
+            Row(horizontalArrangement = Arrangement.Center) {
                 row.forEach { number ->
-                    Button(
-                        onClick = { onNumberClick(number) },
+                    Box(
                         modifier = Modifier
                             .size(60.dp)
-                            .padding(4.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (selectedNumber == number) Color.Gray else Color.LightGray
-                        )
+                            .padding(4.dp)
+                            .background(
+                                if (selectedNumber == number) Color.LightGray else Color.White,
+                                shape = RoundedCornerShape(6.dp)
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color.Black,
+                                shape = RoundedCornerShape(6.dp)
+                            )
+                            .clickable { onNumberClick(number) },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(number.toString())
+                        Text(number.toString(), style = MaterialTheme.typography.titleMedium)
                     }
                 }
             }

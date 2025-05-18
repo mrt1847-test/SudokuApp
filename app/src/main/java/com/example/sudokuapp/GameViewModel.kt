@@ -17,6 +17,7 @@ class GameViewModel : ViewModel() {
 
     fun selectNumber(number: Int) {
         selectedNumber = number
+        inputNumber()
     }
 
     fun newGame(level: String) {
@@ -32,7 +33,11 @@ class GameViewModel : ViewModel() {
 
     fun inputNumber() {
         if (selectedRow in 0..8 && selectedCol in 0..8 && selectedNumber != 0) {
-            board[selectedRow][selectedCol] = selectedNumber
+            board = board.toMutableList().also { updated ->
+                updated[selectedRow] = updated[selectedRow].toMutableList().also {
+                    it[selectedCol] = selectedNumber
+                }
+            }
         }
     }
 }
