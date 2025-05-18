@@ -12,6 +12,13 @@ class GameViewModel : ViewModel() {
     var selectedRow by mutableStateOf(-1)
     var selectedCol by mutableStateOf(-1)
 
+    var selectedNumber by mutableStateOf(0)
+        private set
+
+    fun selectNumber(number: Int) {
+        selectedNumber = number
+    }
+
     fun newGame(level: String) {
         board = List(9) { MutableList(9) { 0 } } // 난이도에 따라 변경 가능
         selectedRow = -1
@@ -23,9 +30,9 @@ class GameViewModel : ViewModel() {
         selectedCol = col
     }
 
-    fun inputNumber(number: Int) {
-        if (selectedRow in 0..8 && selectedCol in 0..8) {
-            board[selectedRow][selectedCol] = number
+    fun inputNumber() {
+        if (selectedRow in 0..8 && selectedCol in 0..8 && selectedNumber != 0) {
+            board[selectedRow][selectedCol] = selectedNumber
         }
     }
 }

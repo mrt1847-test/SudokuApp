@@ -66,7 +66,7 @@ fun LevelSelectScreen(onLevelSelected: (String) -> Unit) {
         listOf("쉬움", "보통", "어려움").forEach { level ->
             Button(
                 onClick = { onLevelSelected(level) },
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(20.dp)
             ) {
                 Text(level)
             }
@@ -74,20 +74,6 @@ fun LevelSelectScreen(onLevelSelected: (String) -> Unit) {
     }
 }
 
-@Composable
-fun GameScreen(viewModel: GameViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        SudokuBoard(viewModel)
-        Spacer(modifier = Modifier.height(24.dp))
-        NumberPad { number -> viewModel.inputNumber(number) }
-    }
-}
 
 @Composable
 fun SudokuBoard(viewModel: GameViewModel) {
@@ -114,7 +100,27 @@ fun SudokuBoard(viewModel: GameViewModel) {
 }
 
 @Composable
-fun NumberPad(onNumberClick: (Int) -> Unit) {
+fun GameScreen(viewModel: GameViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SudokuBoard(viewModel)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "선택한 숫자: ${if (viewModel.selectedNumber == 0) "없음" else viewModel.selectedNumber}",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        NumberPad(onNumberClick = { viewModel.inputNumber() }, selectedNumber = viewModel.selectedNumber)
+    }
+}
+
+@Composable
+fun NumberPad(onNumberClick: (Int) -> Unit, selectedNumber: Int) {
     Column {
         (1..9).chunked(3).forEach { row ->
             Row {
@@ -123,7 +129,10 @@ fun NumberPad(onNumberClick: (Int) -> Unit) {
                         onClick = { onNumberClick(number) },
                         modifier = Modifier
                             .size(60.dp)
-                            .padding(4.dp)
+                            .padding(4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedNumber == number) Color.Gray else Color.LightGray
+                        )
                     ) {
                         Text(number.toString())
                     }
