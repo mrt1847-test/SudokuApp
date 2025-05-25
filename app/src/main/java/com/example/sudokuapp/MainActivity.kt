@@ -41,6 +41,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sudokuapp.ui.theme.SudokuAppTheme
 import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 
 
 class MainActivity : ComponentActivity() {
@@ -95,40 +97,87 @@ fun LevelSelectScreen(onLevelSelected: (String) -> Unit) {
 
 @Composable
 fun SudokuBoard(viewModel: GameViewModel) {
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f) // 정사각형 유지
+    ) {
         viewModel.board.forEachIndexed { rowIndex, row ->
-            Row {
+            Row(modifier = Modifier.weight(1f)) {
                 row.forEachIndexed { colIndex, value ->
                     val isSelected =
                         viewModel.selectedRow == rowIndex && viewModel.selectedCol == colIndex
                     val isSameRowOrCol =
                         rowIndex == viewModel.selectedRow || colIndex == viewModel.selectedCol
                     val isCorrect = viewModel.correctness[rowIndex][colIndex]
-                    val textColor = if (value == 0) Color.Transparent
-                    else if (isCorrect) Color.Black
-                    else Color.Red
+
+                    val textColor = when {
+                        value == 0 -> Color.Transparent
+                        isCorrect -> Color.Black
+                        else -> Color.Red
+                    }
 
                     val backgroundColor = when {
-                        isSelected -> Color.White           // 선택된 셀은 흰색 (테두리로 강조)
-                        isSameRowOrCol -> Color.LightGray   // 같은 행/열은 회색 배경
-                        else -> Color.White                 // 나머지는 흰색
+                        isSelected -> Color.White
+                        isSameRowOrCol -> Color(0xFFEFEFEF)
+                        else -> Color.White
                     }
+
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
                             .padding(0.dp)
-                            .border(
-                                width = if (isSelected) 3.dp else 0.5.dp,
-                                color = if (isSelected) Color.Blue else Color.Black
-                            )
+                            .drawBehind {
+                                val strokeWidthThin = 1.dp.toPx()
+                                val strokeWidthThick = 3.dp.toPx()
+
+                                // 세포 위치에 따라 선 굵기 결정
+                                val topLineWidth = if (rowIndex % 3 == 0) strokeWidthThick else strokeWidthThin
+                                val startLineWidth = if (colIndex % 3 == 0) strokeWidthThick else strokeWidthThin
+
+                                // 각 방향에 선 그리기
+                                // 상단
+                                drawLine(
+                                    color = Color.Black,
+                                    start = Offset(0f, 0f),
+                                    end = Offset(size.width, 0f),
+                                    strokeWidth = topLineWidth
+                                )
+                                // 왼쪽
+                                drawLine(
+                                    color = Color.Black,
+                                    start = Offset(0f, 0f),
+                                    end = Offset(0f, size.height),
+                                    strokeWidth = startLineWidth
+                                )
+                                // 하단
+                                if (rowIndex == 8) {
+                                    drawLine(
+                                        color = Color.Black,
+                                        start = Offset(0f, size.height),
+                                        end = Offset(size.width, size.height),
+                                        strokeWidth = strokeWidthThick
+                                    )
+                                }
+                                // 오른쪽
+                                if (colIndex == 8) {
+                                    drawLine(
+                                        color = Color.Black,
+                                        start = Offset(size.width, 0f),
+                                        end = Offset(size.width, size.height),
+                                        strokeWidth = strokeWidthThick
+                                    )
+                                }
+                            }
                             .background(backgroundColor)
                             .clickable { viewModel.selectCell(rowIndex, colIndex) },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = if (value == 0) "" else value.toString(),
-                            color = textColor
+                            color = textColor,
+                            style = MaterialTheme.typography.titleMedium
                         )
                     }
                 }
