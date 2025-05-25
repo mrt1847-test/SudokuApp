@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -112,7 +113,8 @@ fun SudokuBoard(viewModel: GameViewModel) {
                     }
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .weight(1f)
+                            .aspectRatio(1f)
                             .padding(0.dp)
                             .border(
                                 width = if (isSelected) 3.dp else 0.5.dp,
