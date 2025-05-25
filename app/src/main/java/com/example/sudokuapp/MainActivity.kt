@@ -1,4 +1,5 @@
 package com.example.sudokuapp
+import ads_mobile_sdk.h4
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -50,7 +52,7 @@ class MainActivity : ComponentActivity() {
             SudokuAppTheme {
                 var currentScreen by remember { mutableStateOf("level_select") }
 
-                Surface(modifier = Modifier.fillMaxSize()) {
+                Surface(modifier = Modifier.fillMaxSize(),color = Color.White) {
                     when (currentScreen) {
                         "level_select" -> LevelSelectScreen { level ->
                             gameViewModel.newGame(level)
@@ -178,25 +180,28 @@ fun GameScreen(viewModel: GameViewModel, onGameCompleted: () -> Unit) {
 fun NumberPad(onNumberClick: (Int) -> Unit, selectedNumber: Int) {
     Column {
         (1..9).chunked(9).forEach { row ->
-            Row(horizontalArrangement = Arrangement.Center) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 row.forEach { number ->
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .weight(1f)
+                            .aspectRatio(1f)
                             .padding(4.dp)
                             .background(
                                 if (selectedNumber == number) Color.LightGray else Color.White,
                                 shape = RoundedCornerShape(6.dp)
                             )
-                            .border(
-                                width = 1.dp,
-                                color = Color.Black,
-                                shape = RoundedCornerShape(5.dp)
-                            )
                             .clickable { onNumberClick(number) },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(number.toString(), style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            number.toString(),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.Black
+                        )
                     }
                 }
             }
