@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sudokuapp.ui.theme.SudokuAppTheme
 
+
 class MainActivity : ComponentActivity() {
     private val gameViewModel: GameViewModel by viewModels()
 
@@ -89,19 +90,23 @@ fun SudokuBoard(viewModel: GameViewModel) {
             Row {
                 row.forEachIndexed { colIndex, value ->
                     val isSelected = viewModel.selectedRow == rowIndex && viewModel.selectedCol == colIndex
+                    val isCorrect = viewModel.correctness[rowIndex][colIndex]
+                    val textColor = if (value == 0) Color.Transparent
+                    else if (isCorrect) Color.Black
+                    else Color.Red
                     Box(
                         modifier = Modifier
                             .size(40.dp)
-                            .padding(1.dp)
+                            .padding(0.dp)
                             .border(
-                                width = if (isSelected) 3.dp else 1.dp,
+                                width = if (isSelected) 3.dp else 0.5.dp,
                                 color = if (isSelected) Color.Blue else Color.Black
                             )
                             .background(Color.White)
                             .clickable { viewModel.selectCell(rowIndex, colIndex) },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = if (value == 0) "" else value.toString())
+                        Text(text = if (value == 0) "" else value.toString(),color = textColor)
                     }
                 }
             }
@@ -138,12 +143,12 @@ fun GameScreen(viewModel: GameViewModel) {
 @Composable
 fun NumberPad(onNumberClick: (Int) -> Unit, selectedNumber: Int) {
     Column {
-        (1..9).chunked(3).forEach { row ->
+        (1..9).chunked(9).forEach { row ->
             Row(horizontalArrangement = Arrangement.Center) {
                 row.forEach { number ->
                     Box(
                         modifier = Modifier
-                            .size(60.dp)
+                            .size(40.dp)
                             .padding(4.dp)
                             .background(
                                 if (selectedNumber == number) Color.LightGray else Color.White,
@@ -152,7 +157,7 @@ fun NumberPad(onNumberClick: (Int) -> Unit, selectedNumber: Int) {
                             .border(
                                 width = 1.dp,
                                 color = Color.Black,
-                                shape = RoundedCornerShape(6.dp)
+                                shape = RoundedCornerShape(5.dp)
                             )
                             .clickable { onNumberClick(number) },
                         contentAlignment = Alignment.Center
