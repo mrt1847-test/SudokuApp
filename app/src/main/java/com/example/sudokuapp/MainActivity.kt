@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.sudokuapp.ui.theme.SudokuAppTheme
+import androidx.compose.material3.AlertDialog
 
 
 class MainActivity : ComponentActivity() {
@@ -54,7 +55,13 @@ class MainActivity : ComponentActivity() {
                             gameViewModel.newGame(level)
                             currentScreen = "game"
                         }
-                        "game" -> GameScreen(gameViewModel)
+                        "game" -> GameScreen(
+                            viewModel = gameViewModel,
+                            onGameCompleted = {
+                                gameViewModel.resetGame()
+                                currentScreen = "level_select"
+                            }
+                        )
                     }
                 }
             }
@@ -89,11 +96,20 @@ fun SudokuBoard(viewModel: GameViewModel) {
         viewModel.board.forEachIndexed { rowIndex, row ->
             Row {
                 row.forEachIndexed { colIndex, value ->
-                    val isSelected = viewModel.selectedRow == rowIndex && viewModel.selectedCol == colIndex
+                    val isSelected =
+                        viewModel.selectedRow == rowIndex && viewModel.selectedCol == colIndex
+                    val isSameRowOrCol =
+                        rowIndex == viewModel.selectedRow || colIndex == viewModel.selectedCol
                     val isCorrect = viewModel.correctness[rowIndex][colIndex]
                     val textColor = if (value == 0) Color.Transparent
                     else if (isCorrect) Color.Black
                     else Color.Red
+
+                    val backgroundColor = when {
+                        isSelected -> Color.White           // 선택된 셀은 흰색 (테두리로 강조)
+                        isSameRowOrCol -> Color.LightGray   // 같은 행/열은 회색 배경
+                        else -> Color.White                 // 나머지는 흰색
+                    }
                     Box(
                         modifier = Modifier
                             .size(40.dp)
@@ -102,11 +118,14 @@ fun SudokuBoard(viewModel: GameViewModel) {
                                 width = if (isSelected) 3.dp else 0.5.dp,
                                 color = if (isSelected) Color.Blue else Color.Black
                             )
-                            .background(Color.White)
+                            .background(backgroundColor)
                             .clickable { viewModel.selectCell(rowIndex, colIndex) },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = if (value == 0) "" else value.toString(),color = textColor)
+                        Text(
+                            text = if (value == 0) "" else value.toString(),
+                            color = textColor
+                        )
                     }
                 }
             }
@@ -115,7 +134,7 @@ fun SudokuBoard(viewModel: GameViewModel) {
 }
 
 @Composable
-fun GameScreen(viewModel: GameViewModel) {
+fun GameScreen(viewModel: GameViewModel, onGameCompleted: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -126,7 +145,7 @@ fun GameScreen(viewModel: GameViewModel) {
         SudokuBoard(viewModel)
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "선택한 숫자: ${if (viewModel.selectedNumber == 0) "없음" else viewModel.selectedNumber}",
+            text = "선택한 숫자: ${if (viewModel.selectedNumber == 0) "없음" else viewModel.selectedNumber} ",
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -138,7 +157,20 @@ fun GameScreen(viewModel: GameViewModel) {
             selectedNumber = viewModel.selectedNumber
         )
     }
+    if (viewModel.isGameCompleted) {
+        AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {
+                Button(onClick = { onGameCompleted() }) {
+                    Text("확인")
+                }
+            },
+            title = { Text("🎉 게임 완료!") },
+            text = { Text("모든 정답을 맞췄습니다!\n축하합니다!") }
+        )
+    }
 }
+
 
 @Composable
 fun NumberPad(onNumberClick: (Int) -> Unit, selectedNumber: Int) {

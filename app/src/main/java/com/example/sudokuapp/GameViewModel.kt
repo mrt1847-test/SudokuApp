@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 class GameViewModel : ViewModel() {
     var board by mutableStateOf(List(9) { MutableList(9) { 0 } })
         private set
+    var isGameCompleted by mutableStateOf(false)
+        private set
 
     var selectedRow by mutableStateOf(-1)
     var selectedCol by mutableStateOf(-1)
@@ -21,6 +23,13 @@ class GameViewModel : ViewModel() {
     fun selectNumber(number: Int) {
         selectedNumber = number
         inputNumber()
+    }
+
+    fun resetGame() {
+        selectedRow = -1
+        selectedCol = -1
+        selectedNumber = 0
+        isGameCompleted = false
     }
 
     fun newGame(level: String) {
@@ -42,7 +51,6 @@ class GameViewModel : ViewModel() {
 
         // 빈 보드 생성
         board = List(9) { MutableList(9) { 0 } }
-        correctness = List(9) { MutableList(9) { true } }
         selectedRow = -1
         selectedCol = -1
         selectedNumber = 0
@@ -64,11 +72,19 @@ class GameViewModel : ViewModel() {
         }
         positions.shuffle()
 
-        // 정답 중 일부를 보드에 복사
+        // 전체 false로 초기화
+        correctness = List(9) { MutableList(9) { false } }
+
+        // 정답 중 일부를 보드에 복사하고 correctness도 true로 표시
         positions.take(revealCount).forEach { (row, col) ->
             board = board.toMutableList().also { updated ->
                 updated[row] = updated[row].toMutableList().also {
                     it[col] = solutionBoard[row][col]
+                }
+            }
+            correctness = correctness.toMutableList().also { updated ->
+                updated[row] = updated[row].toMutableList().also {
+                    it[col] = true
                 }
             }
         }
@@ -92,6 +108,9 @@ class GameViewModel : ViewModel() {
                     it[selectedCol] = selectedNumber == solutionBoard[selectedRow][selectedCol]
                 }
             }
+            // 모든 정답 검사
+
         }
+        isGameCompleted = correctness.all { row -> row.all { it } }
     }
 }
