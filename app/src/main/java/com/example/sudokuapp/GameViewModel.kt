@@ -50,6 +50,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         selectedRow = -1
         selectedCol = -1
         selectedNumber = 0
+        isNoteMode = false
         isGameCompleted = false
         elapsedSeconds = 0
         errorCount = 0
@@ -62,6 +63,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         selectedRow = -1
         selectedCol = -1
         selectedNumber = 0
+        isNoteMode = false
         givenCells = List(9) { MutableList(9) { false } }
         conflictCells = List(9) { MutableList(9) { false } }
         isGameCompleted = false
@@ -229,6 +231,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         solutionBoard = deserializeBoard(solutionData)
         givenCells = deserializeBoolBoard(givenData)
         notes = deserializeNotes(notesData)
+        selectedRow = -1
+        selectedCol = -1
+        selectedNumber = 0
+        isNoteMode = false
         correctness = List(9) { row ->
             MutableList(9) { col ->
                 board[row][col] != 0 && board[row][col] == solutionBoard[row][col]
@@ -244,7 +250,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         return true
     }
 
-    fun hasSavedGame(): Boolean = prefs.contains("board")
+    fun hasSavedGame(): Boolean =
+        prefs.contains("board") && prefs.contains("solution") && prefs.contains("given")
 
     fun clearSavedGame() {
         prefs.edit()
